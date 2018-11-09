@@ -211,7 +211,7 @@ for epoch in xrange(start_epoch, config.max_epoch):
                 avg_valid_loss += validate(x_batch, mask_batch)
             avg_valid_loss /= nvalid_batches
             losses_eval_valid.append(avg_valid_loss)
-            loss_to_file('validation', train_loss)
+            loss_to_file('validation', avg_valid_loss)
             print "    loss:\t%.6f" % avg_valid_loss
             print
 
@@ -238,5 +238,5 @@ for epoch in xrange(start_epoch, config.max_epoch):
 
 
 def loss_to_file(type, loss):
-    with open(filename + '_' + metadata_target_path, 'a') as f:
+    with open(type + '_' + metadata_target_path, 'a') as f:
         f.write('\n' + str(loss))
