@@ -16,6 +16,10 @@ from data_iter import DataIterator
 print theano.config.floatX
 theano.config.warn_float64 = 'raise'
 
+def loss_to_file(type, loss):
+    with open(type + '_' + metadata_target_path, 'a') as f:
+        f.write('\n' + str(loss))
+
 if len(sys.argv) < 3:
     sys.exit("Usage: train_rnn.py <configuration_name> <train data filename>")
 
@@ -235,8 +239,3 @@ for epoch in xrange(start_epoch, config.max_epoch):
             }, f, pickle.HIGHEST_PROTOCOL)
 
         print "  saved to %s" % metadata_target_path
-
-
-def loss_to_file(type, loss):
-    with open(type + '_' + metadata_target_path, 'a') as f:
-        f.write('\n' + str(loss))
