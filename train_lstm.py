@@ -16,9 +16,9 @@ from data_iter import DataIterator
 print theano.config.floatX
 theano.config.warn_float64 = 'raise'
 
-def loss_to_file(type, loss):
-    with open(type + '_' + metadata_target_path, 'a') as f:
-        f.write('\n' + str(loss))
+def loss_to_file(filename, loss):
+    with open(metadata_target_path + '_' + filename, 'a') as f:
+        f.write(str(loss) + '\n')
 
 if len(sys.argv) < 3:
     sys.exit("Usage: train_rnn.py <configuration_name> <train data filename>")
