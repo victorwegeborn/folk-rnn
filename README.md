@@ -1,5 +1,51 @@
 ![My image](https://github.com/IraKorshunova/folk-rnn/blob/master/folkrnn_logo.png)
 
+## Experiment to run:
+
+###LSTM:
+
+- [ ]: pretrain of LSTM 
+- [ ]: Folkwiki tuning with dropout
+- [ ]: Folkwiki tuning w/o dropout
+
+```
+# pretraining of lstm
+python train_lstm.py pretrain data/folkwiki_and_sessions.txt
+
+# Set resume_path in dropout.py config
+# resume_path='lstm_pretrain_......'
+# tuning w/ dropout
+python train_lstm.py dropout data/folkwiki.txt
+
+
+# Set resume_path in dropout.py config
+# resume_path='lstm_pretrain_......'
+# tuning w/o dropout
+python train_lstm.py no_dropout data/folkwiki.txt
+```
+
+###GRU:
+
+- [ ]: pretrain of GRU
+- [ ]: Folkwiki tuning with dropout
+- [ ]: Follwiki tuning w/o dropout
+
+```
+# pretraining of lstm
+python train_gru.py pretrain data/folkwiki_and_sessions.txt
+
+# Set resume_path in dropout.py config
+# resume_path='lstm_pretrain_......'
+# tuning w/ dropout
+python train_gru.py dropout data/folkwiki.txt
+
+
+# Set resume_path in dropout.py config
+# resume_path='lstm_pretrain_......'
+# tuning w/o dropout
+python train_gru.py no_dropout data/folkwiki.txt
+```
+
 # Folk music style modelling using LSTMs
 
 See the following websites:
