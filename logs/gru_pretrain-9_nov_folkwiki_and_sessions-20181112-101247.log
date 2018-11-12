@@ -1,0 +1,32 @@
+vocabulary size: 226
+n tunes: 26240
+n train tunes: 24960.0
+n validation tunes: 1280.0
+min, max length 2 997
+Building the model
+Traceback (most recent call last):
+  File "train_gru.py", line 124, in <module>
+    predictions = nn.layers.get_output(l_out)
+  File "/home/hallstrom.eric/miniconda2/lib/python2.7/site-packages/lasagne/layers/helper.py", line 197, in get_output
+    all_outputs[layer] = layer.get_output_for(layer_inputs, **kwargs)
+  File "/home/hallstrom.eric/miniconda2/lib/python2.7/site-packages/lasagne/layers/recurrent.py", line 1489, in get_output_for
+    strict=True)[0]
+  File "/home/hallstrom.eric/.local/lib/python2.7/site-packages/theano/scan_module/scan.py", line 1077, in scan
+    scan_outs = local_op(*scan_inputs)
+  File "/home/hallstrom.eric/.local/lib/python2.7/site-packages/theano/gof/op.py", line 615, in __call__
+    node = self.make_node(*inputs, **kwargs)
+  File "/home/hallstrom.eric/.local/lib/python2.7/site-packages/theano/scan_module/scan_op.py", line 634, in make_node
+    [t() for t in self.output_types])
+  File "/home/hallstrom.eric/.local/lib/python2.7/site-packages/theano/gof/type.py", line 420, in __call__
+    return utils.add_tag_trace(self.make_variable(name))
+  File "/home/hallstrom.eric/.local/lib/python2.7/site-packages/theano/gof/utils.py", line 108, in add_tag_trace
+    tr = simple_extract_stack(limit=user_line, skips=skips)
+  File "/home/hallstrom.eric/.local/lib/python2.7/site-packages/theano/gof/utils.py", line 46, in simple_extract_stack
+    line = linecache.getline(filename, lineno, f.f_globals)
+  File "/home/hallstrom.eric/miniconda2/lib/python2.7/linecache.py", line 14, in getline
+    lines = getlines(filename, module_globals)
+  File "/home/hallstrom.eric/miniconda2/lib/python2.7/linecache.py", line 41, in getlines
+    return updatecache(filename, module_globals)
+  File "/home/hallstrom.eric/miniconda2/lib/python2.7/linecache.py", line 132, in updatecache
+    lines = fp.readlines()
+KeyboardInterrupt

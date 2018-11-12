@@ -1,0 +1,6 @@
+vocabulary size: 226
+Traceback (most recent call last):
+  File "train_gru.py", line 72, in <module>
+    valid_idxs = rng.choice(np.arange(ntunes), nvalid_tunes, replace=False)
+  File "mtrand.pyx", line 1192, in mtrand.RandomState.choice
+TypeError: 'numpy.float64' object cannot be interpreted as an index
