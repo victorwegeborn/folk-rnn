@@ -2,7 +2,7 @@
 
 ## Experiment to run:
 
-###LSTM:
+### LSTM:
 
 - [ ]: pretrain of LSTM 
 - [ ]: Folkwiki tuning with dropout
@@ -24,9 +24,9 @@ python train_lstm.py dropout data/folkwiki.txt
 python train_lstm.py no_dropout data/folkwiki.txt
 ```
 
-###GRU:
+### GRU:
 
-- [ ]: pretrain of GRU
+- [x]: pretrain of GRU
 - [ ]: Folkwiki tuning with dropout
 - [ ]: Follwiki tuning w/o dropout
 
