@@ -29,7 +29,6 @@ def plot_histogram(data, normalize, title):
     plt.title(title)
     plt.bar(np.arange(len(labels)), values)
     plt.xticks(np.arange(len(labels)), labels, rotation=70)
-    plt.savefig('my_fig.png', dpi=dpi)
     plt.show()
 
 def analyze(filename):
@@ -121,7 +120,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-n',
         '--normalize',
-        help='normalize values in graph'
+        help='normalize values in graph',
         action='store_true',
     )
     args = parser.parse_args()
