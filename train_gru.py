@@ -12,9 +12,10 @@ from itertools import izip
 import theano.tensor as T
 from lasagne.layers import *
 from data_iter import DataIterator
+import pdb
 
 print theano.config.floatX
-theano.config.warn_float64 = 'raise'
+#theano.config.warn_float64 = 'raise'
 
 def loss_to_file(filename, loss):
     with open(metadata_target_path + '_' + filename, 'a') as f:
@@ -35,7 +36,7 @@ print experiment_id
 # metadata
 if not os.path.isdir('metadata'):
         os.makedirs('metadata')
-metadata_target_path = 'metadata/%s.pkl' % experiment_id
+metadata_target_path = 'metadata/%s_epoch0.pkl' % experiment_id
 
 # logs
 if not os.path.isdir('logs'):
@@ -101,7 +102,7 @@ for _ in xrange(config.num_layers):
 
     reset_gate = Gate(W_in=nn.init.GlorotUniform(), W_hid=nn.init.Orthogonal())
     update_gate = Gate(W_in=nn.init.GlorotUniform(), W_hid=nn.init.Orthogonal())
-    hidden_update_gate = Gate(W_in=nn.init.GlorotUniform(), W_hid=nn.init.Orthogonal())
+    hidden_update_gate = Gate(W_in=nn.init.GlorotUniform(), W_hid=nn.init.Orthogonal(), nonlinearity=nn.nonlinearities.tanh)
 
     main_layers.append(
         GRULayer(
@@ -225,6 +226,7 @@ for epoch in xrange(start_epoch, config.max_epoch):
         print 'setting learning rate to %.7f' % new_learning_rate
 
     if (epoch + 1) % config.save_every == 0:
+	metadata_target_path = 'metadata/%s_epoch%s.pkl' % (experiment_id, epoch)
         with open(metadata_target_path, 'w') as f:
             pickle.dump({
                 'configuration': config_name,
