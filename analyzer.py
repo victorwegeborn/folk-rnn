@@ -3,33 +3,48 @@ import re
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.io import savemat
 
 keys = {}
 metrics = {}
 token_families = {}
 
 
-def plot_histogram(data, normalize, title):
+def sort_by_label(data):
     labels = []
     values = []
-
     for key, val in data.items():
         labels.append(key)
         values.append(val)
-
-    # sort on labels
     values = [v for _,v in sorted(zip(labels, values))]
     labels = sorted(labels)
+    return labels, values
+
+def plot_histogram(data, normalize, title):
+    labels, values = sort_by_label(data)
 
     values = np.array(values).astype(float)
     if normalize:
         values /= np.sum(values)
 
-
     plt.title(title)
     plt.bar(np.arange(len(labels)), values)
     plt.xticks(np.arange(len(labels)), labels, rotation=70)
     plt.show()
+
+def convert_to_mat(filename):
+
+    keys_labels, keys_values = sort_by_label(keys)
+    metrics_labels, metrics_values = sort_by_label(metrics)
+    token_labels, token_values = sort_by_label(token_families)
+    savemat(filename, {
+        'keys_l': keys_labels,
+        'keys_v': keys_values,
+        'metrics_l': metrics_labels,
+        'metrics_v': metrics_values,
+        'token_l': token_labels,
+        'token_v': token_values
+    })
 
 def analyze(filename):
 
@@ -47,6 +62,7 @@ def analyze(filename):
     re_bar = re.compile(r":?\|:?")
     re_durations = re.compile(r"[<>]{1,2}")
     re_grouping = re.compile(r"[\[\]]")
+    re_error = re.compile(r".+")
     #Regex should be added in prority order since if one matches
     #it will stop
     regex_dict = {
@@ -62,21 +78,34 @@ def analyze(filename):
             'duration': re_durations,
             'grouping': re_grouping,
             'length_2': re_length_short_2,
-            'length_4': re_length_short_4
+            'length_4': re_length_short_4,
+            'error': re_error
             }
 
     with open(filename, 'r') as f:
+        token_count = 0
+        expected_token_count = 0
         for line in f:
             tokens = line.split()
             for token in tokens:
+
+                # Remove X:0 from bobs transcripts
+                if re.match(r"X:\d+", token):
+                    continue
+                expected_token_count += 1
+
                 for token_family, reg in regex_dict.items():
                     match = reg.match(token)
                     if match is None:
                         continue
+                    token_count += 1
 
                     # group togheter all length-types
-                    if token_family == 'length_2' or token_family == 'length_4':
-                        token_family = 'length'
+                    #if token_family == 'length_2' or token_family == 'length_4':
+                    #    token_family = 'length'
+
+                    if token_family == 'error':
+                        print(token)
 
                     if token_family not in token_families:
                         token_families[token_family] = 1
@@ -94,13 +123,13 @@ def analyze(filename):
                             metrics[token] = 1
                         metrics[token] += 1
 
-
+                    break
 
 
         print(json.dumps(keys, sort_keys=True, indent=2))
         print(json.dumps(metrics, sort_keys=True, indent=2))
         print(json.dumps(token_families, sort_keys=True, indent=2))
-
+        print('Tokens found: {} of {} ({:.3f}%)'.format(token_count, expected_token_count, float(token_count/expected_token_count)))
 
 
 if __name__ == '__main__':
@@ -123,8 +152,19 @@ if __name__ == '__main__':
         help='normalize values in graph',
         action='store_true',
     )
+    parser.add_argument(
+        '-om',
+        '--output_matlab',
+        required=False,
+        help='output summary to ./path/of/filename.mat',
+        default=None,
+    )
     args = parser.parse_args()
     analyze(args.file)
-    plot_histogram(keys, args.normalize, 'Key distribution %s' % args.title)
-    plot_histogram(metrics, args.normalize, 'Metric distribution %s' % args.title)
-    plot_histogram(token_families, args.normalize, 'Token distribution %s' % args.title)
+
+    if args.output_matlab:
+        convert_to_mat(args.output_matlab)
+    else:
+        plot_histogram(keys, args.normalize, 'Key distribution %s' % args.title)
+        plot_histogram(metrics, args.normalize, 'Metric distribution %s' % args.title)
+        plot_histogram(token_families, args.normalize, 'Token distribution %s' % args.title)
