@@ -13,7 +13,7 @@ function [] = plot_hist( labels, values, size, filename, offset)
     ax.GridLineStyle = '-';
     xtickangle(70);
     xticklabels(labels);
-    set(gca,'FontSize',14)
+    set(gca,'FontSize',16)
     
     saveas(gca, strcat('./figures/', filename, '.png'))
     

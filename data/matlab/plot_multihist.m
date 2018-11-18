@@ -38,14 +38,13 @@ function [] = plot_multihist( labels, values, size_, offset, filename, cluster)
     v = [values{:}]';
     values = reshape(v, [length(values{1}), length(values)]);
 
-    
-
+   
    
     labels = new_labels;
     figure('rend','painters','pos', size_);
     bar(values);
     key_ticks = (1:length(labels));
-    xlim([0 key_ticks(end)+1])
+    xlim([0 key_ticks(end)+1]);
     xticks(key_ticks-offset);
     ax = gca;
     ax.TickLength = [0 0];
@@ -53,8 +52,20 @@ function [] = plot_multihist( labels, values, size_, offset, filename, cluster)
     ax.GridLineStyle = '-';
     xtickangle(70);
     xticklabels(labels);
-    set(gca,'FontSize',14)
+    set(gca,'FontSize',14);
+    colormap(ax,rgb2gray(parula));
     legend(cluster,'Orientation','horizontal','Location','northoutside');
+    
+    ax = gca;
+    outerpos = ax.OuterPosition;
+    ti = ax.TightInset;
+    left = outerpos(1) + ti(1);
+    bottom = outerpos(2) + ti(2);
+    ax_width = outerpos(3) - ti(1) - ti(3)-0.01;
+    ax_height = outerpos(4) - ti(2) - ti(4);
+    ax.Position = [left bottom ax_width ax_height];
+    set(gca,'color','none');
+    
     
     saveas(gca, strcat('./figures/', filename, '.png'));
     
