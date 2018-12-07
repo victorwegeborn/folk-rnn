@@ -84,7 +84,7 @@ FC_output_W = metadata['param_values'][43];
 FC_output_b = metadata['param_values'][44];
 
 def sigmoid(x): return 1/(1 + np.exp(-x))
-def softmax(x,T): 
+def softmax(x,T):
     expx=np.exp(x/T)
     sumexpx=np.sum(expx)
     if sumexpx==0:
@@ -102,7 +102,7 @@ seed_sequence = [start_idx]
 if seed is not None:
     for token in seed.split(' '):
          seed_sequence.append(token2idx[token])
-         
+
     # initialise network
     for tok in seed_sequence[:-1]:
        x = np.zeros(sizeofx, dtype=np.int8)
@@ -150,8 +150,8 @@ for i in xrange(ntunes):
        next_itoken=rng.choice(vocab_idxs, p=output[-1].squeeze())
        sequence.append(next_itoken)
        if len(sequence) > 1000: break
-    
-    np.savetxt('heatmap_'+repr(i)+'.txt',np.concatenate(output),fmt='%.5f',delimiter=',')
+
+    #np.savetxt('heatmap_'+repr(i)+'.txt',np.concatenate(output),fmt='%.5f',delimiter=',')
     abc_tune = [idx2token[j] for j in sequence[1:-1]]
     if not args.terminal:
         print('X:' + repr(i))
