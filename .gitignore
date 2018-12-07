@@ -1,2 +1,4 @@
 .idea/
 *.pyc
+
+metadata/gru_no_dropout/*
