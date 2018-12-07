@@ -1,5 +1,6 @@
-function [] = plot_multihist( labels, values, size_, offset, filename, cluster)
-       
+function [] = plot_multihist(labels, values, size_, offset, filename, cluster, x_label, loc, yaxle, yoff)
+    
+    
 
     lab = {};
     for i = 1:length(labels)
@@ -34,27 +35,67 @@ function [] = plot_multihist( labels, values, size_, offset, filename, cluster)
         end
         values{i} = new_values;
     end
+ 
+   
     
-    v = [values{:}]';
-    values = reshape(v, [length(values{1}), length(values)]);
+    n_buckets = length(values);
+    bucket_length = length(values{1});
+    vals = cell(1, n_buckets);
+    labs = cell(1);
+    % filter out less then 1%
+    if strcmp('Key', x_label)
+        for i = 1:bucket_length
+            p = 0;
+            for j = 1:n_buckets
+                p = p + values{j}(1,i);
+            end
+            
+            if p >= double(n_buckets)
+               for j = 1:n_buckets
+                    vals{j}(1,i) = values{j}(1,i);
+                    labs(1,i) = new_labels(1,i);
+               end
+            end
+        end
+    elseif strcmp('Meter', x_label)
+        for i = 1:length(new_labels)
+            new_labels(1,i)
+            if any(strcmp({'2/2', '2/4', '3/4', '4/4', '6/8', '9/8'}, new_labels(1,i)))
+                labs(1,i) = strtrim(new_labels(1,i))
+                for j = 1:n_buckets
+                    vals{j}(1,i) = values{j}(1,i);
+                end
+            end
+        end
 
-   
-   
-    labels = new_labels;
+    end
+
+    v = [vals{:}]';
+    values = reshape(v, [length(vals{1}), length(vals)]);
+    values( ~any(values,2), : ) = [];
+    cm = [0 0 0; 0.54 0.54 0.54; 0.73 0.73 0.73];
+    labels = labs;
+    labels(cellfun('isempty', labels)) = [];
     figure('rend','painters','pos', size_);
-    bar(values);
-    key_ticks = (1:length(labels));
+    bar(values, 'EdgeColor', 'None', 'BarWidth', 1);
+    key_ticks = (1:length(values));
     xlim([0 key_ticks(end)+1]);
     xticks(key_ticks-offset);
+    yticks(yaxle)
     ax = gca;
     ax.TickLength = [0 0];
     ax.YGrid = 'on';
     ax.GridLineStyle = '-';
+    ax.GridAlpha = 0.5;
     xtickangle(70);
     xticklabels(labels);
     set(gca,'FontSize',14);
-    colormap(ax,rgb2gray(parula));
-    legend(cluster,'Orientation','horizontal','Location','northoutside');
+    colormap(ax,rgb2gray(cm));
+    legend(cluster,'Orientation','vertical','Location',loc);
+    
+    y = ylabel('% of transcriptions');
+    
+    xlabel(x_label);
     
     ax = gca;
     outerpos = ax.OuterPosition;
@@ -66,8 +107,11 @@ function [] = plot_multihist( labels, values, size_, offset, filename, cluster)
     ax.Position = [left bottom ax_width ax_height];
     set(gca,'color','none');
     
+    ypos = y.Position + ([0 yoff 0]);
+    set(y, 'Position', ypos);
     
     saveas(gca, strcat('./figures/', filename, '.png'));
+    
     
 end
 

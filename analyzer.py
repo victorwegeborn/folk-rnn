@@ -8,7 +8,9 @@ from scipy.io import savemat
 keys = {}
 metrics = {}
 token_families = {}
-
+line_structure = {}
+notes = {}
+song_token_counts = {}
 
 def sort_by_label(data):
     labels = []
@@ -37,16 +39,22 @@ def convert_to_mat(filename):
     keys_labels, keys_values = sort_by_label(keys)
     metrics_labels, metrics_values = sort_by_label(metrics)
     token_labels, token_values = sort_by_label(token_families)
+    note_label, note_value = sort_by_label(notes)
+    count_label, count_value = sort_by_label(song_token_counts)
     savemat(filename, {
         'keys_l': keys_labels,
         'keys_v': keys_values,
         'metrics_l': metrics_labels,
         'metrics_v': metrics_values,
         'token_l': token_labels,
-        'token_v': token_values
+        'token_v': token_values,
+        'note_l': note_label,
+        'note_v': note_value,
+        'count_l': count_label,
+        'count_v': count_value
     })
 
-def analyze(filename):
+def analyze(filename, structures):
 
     # Taken from the parser
     re_key = re.compile(r"\\?\[?K:\s?[ABCDEFG][#b]?\s?(major|maj|m|minor|min|mixolydian|mix|dorian|dor|phrygian|phr|lydian|lyd|locrian|loc)?\]?", re.IGNORECASE)
@@ -85,51 +93,93 @@ def analyze(filename):
     with open(filename, 'r') as f:
         token_count = 0
         expected_token_count = 0
+        T = []
+        text = []
         for line in f:
+            text = f.read()
+        songs = text.split('\n\n')
+
+
+        for line in songs:
             tokens = line.split()
-            for token in tokens:
+            # Remove X:0 from bobs transcripts
+            if len(tokens) > 0:
+                if re.match(r"X:\d+", tokens[0]):
+                    del tokens[0]
 
-                # Remove X:0 from bobs transcripts
-                if re.match(r"X:\d+", token):
-                    continue
-                expected_token_count += 1
+                l = len(tokens)
+                if l not in song_token_counts:
+                    song_token_counts[l] = 0
+                song_token_counts[l] += 1
 
-                for token_family, reg in regex_dict.items():
-                    match = reg.match(token)
-                    if match is None:
-                        continue
-                    token_count += 1
 
-                    # group togheter all length-types
-                    #if token_family == 'length_2' or token_family == 'length_4':
-                    #    token_family = 'length'
+                structure = ''
+                struct_check = False
+                for token in tokens:
+                    expected_token_count += 1
+                    for token_family, reg in regex_dict.items():
+                        match = reg.match(token)
+                        if match is None:
+                            continue
+                        token_count += 1
 
-                    if token_family == 'error':
-                        print(token)
 
-                    if token_family not in token_families:
-                        token_families[token_family] = 1
-                    token_families[token_family] += 1
+                        if structures:
+                            if token_family == 'bar' or token_family == 'repeat':
+                                struct_check = True
+                                structure += token + ' '
 
-                    if token_family == 'key':
-                        token = re.search('\[K:(.+?)\]', token).group(1)
-                        if token not in keys:
-                            keys[token] = 1
-                        keys[token] += 1
+                        # group togheter all length-types
+                        #if token_family == 'length_2' or token_family == 'length_4':
+                        #    token_family = 'length'
 
-                    if token_family == 'meter':
-                        token = re.search('\[M:(.+?)\]', token).group(1)
-                        if token not in metrics:
-                            metrics[token] = 1
-                        metrics[token] += 1
+                        if token_family == 'error':
+                            print(token)
 
-                    break
+                        if token_family not in token_families:
+                            token_families[token_family] = 0
+                        token_families[token_family] += 1
 
+                        if token_family == 'key':
+                            token = re.search('\[K:(.+?)\]', token).group(1)
+                            if token not in keys:
+                                keys[token] = 0
+                            keys[token] += 1
+
+                        if token_family == 'meter':
+                            token = re.search('\[M:(.+?)\]', token).group(1)
+                            if token not in metrics:
+                                metrics[token] = 0
+                            metrics[token] += 1
+
+                        if token_family == 'note':
+                            if token not in notes:
+                                notes[token] = 0
+                            notes[token] += 1
+
+                        break
+
+                if len(structure) > 0:
+                    if structure not in line_structure:
+                        line_structure[structure] = 1
+                    line_structure[structure] += 1
 
         print(json.dumps(keys, sort_keys=True, indent=2))
         print(json.dumps(metrics, sort_keys=True, indent=2))
         print(json.dumps(token_families, sort_keys=True, indent=2))
-        print('Tokens found: {} of {} ({:.3f}%)'.format(token_count, expected_token_count, float(token_count/expected_token_count)))
+        print(json.dumps(song_token_counts, sort_keys=True, indent=2))
+        print(json.dumps(notes, sort_keys=True, indent=2))
+        print('Tokens found: {} of {} ({:.3f}%)'.format(token_count, expected_token_count, float(token_count/expected_token_count)*100))
+
+        if structures:
+            print('Top {} line structures'.format(structures))
+            print('ID\tCOUNT\tSTRUCTURE')
+            id = 1
+            for structure, count in reversed(sorted(line_structure.items(), key=lambda kv: kv[1])):
+                print(f'{id}\t{count}\t{structure}')
+                id += 1
+                if id > int(structures):
+                    break
 
 
 if __name__ == '__main__':
@@ -159,12 +209,18 @@ if __name__ == '__main__':
         help='output summary to ./path/of/filename.mat',
         default=None,
     )
+    parser.add_argument(
+        '--line_structure',
+        help='parses for top number of measure line structures',
+        default=False
+    )
     args = parser.parse_args()
-    analyze(args.file)
+    analyze(args.file, args.line_structure)
 
     if args.output_matlab:
         convert_to_mat(args.output_matlab)
     else:
-        plot_histogram(keys, args.normalize, 'Key distribution %s' % args.title)
-        plot_histogram(metrics, args.normalize, 'Metric distribution %s' % args.title)
-        plot_histogram(token_families, args.normalize, 'Token distribution %s' % args.title)
+        #plot_histogram(keys, args.normalize, 'Key distribution %s' % args.title)
+        #plot_histogram(metrics, args.normalize, 'Metric distribution %s' % args.title)
+        #plot_histogram(token_families, args.normalize, 'Token distribution %s' % args.title)
+        pass
