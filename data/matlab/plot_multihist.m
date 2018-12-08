@@ -59,9 +59,9 @@ function [] = plot_multihist(labels, values, size_, offset, filename, cluster, x
         end
     elseif strcmp('Meter', x_label)
         for i = 1:length(new_labels)
-            new_labels(1,i)
+            new_labels(1,i);
             if any(strcmp({'2/2', '2/4', '3/4', '4/4', '6/8', '9/8'}, new_labels(1,i)))
-                labs(1,i) = strtrim(new_labels(1,i))
+                labs(1,i) = strtrim(new_labels(1,i));
                 for j = 1:n_buckets
                     vals{j}(1,i) = values{j}(1,i);
                 end
@@ -90,7 +90,8 @@ function [] = plot_multihist(labels, values, size_, offset, filename, cluster, x
     xtickangle(70);
     xticklabels(labels);
     set(gca,'FontSize',14);
-    colormap(ax,rgb2gray(cm));
+    %colormap(ax,rgb2gray(cm));
+    colormap(ax, parula);
     legend(cluster,'Orientation','vertical','Location',loc);
     
     y = ylabel('% of transcriptions');

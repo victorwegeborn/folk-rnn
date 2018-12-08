@@ -49,7 +49,8 @@ function [] = plot_multihist2( labels, values, size_, offset, filename, cluster,
     xtickangle(70);
     xticklabels(key_ticks*bucket_size);
     set(gca,'FontSize',14);
-    colormap(ax,rgb2gray(cm));
+    %colormap(ax,rgb2gray(cm));
+    colormap(ax, parula);
     legend(cluster,'Orientation','vertical','Location','northeast');
     y = ylabel('% of transcriptions');
     xlabel('Number of tokens');
